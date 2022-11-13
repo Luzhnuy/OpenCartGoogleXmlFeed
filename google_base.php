@@ -1,10 +1,7 @@
 <?php
-
-class ControllerExtensionFeedGoogleBase extends Controller
-{
-    public function index()
-    {
-        $output = '<?xml version="1.0" encoding="UTF-8" ?>';
+class ControllerExtensionFeedGoogleBase extends Controller {
+    public function index() {
+        $output  = '<?xml version="1.0" encoding="UTF-8" ?>';
         $output .= '<rss version="2.0" xmlns:g="http://base.google.com/ns/1.0">';
         $output .= '  <channel>';
         $output .= '  <title>' . $this->config->get('config_name') . '</title>';
@@ -19,7 +16,12 @@ class ControllerExtensionFeedGoogleBase extends Controller
 
         $product_data = array();
 
-        $filter_data = array();
+// 			$google_base_categories = $this->model_extension_feed_google_base->getCategories();
+
+// 			foreach ($google_base_categories as $google_base_category) {
+        $filter_data = array(
+
+        );
 
         $products = $this->model_catalog_product->getProducts($filter_data);
 
@@ -32,7 +34,7 @@ class ControllerExtensionFeedGoogleBase extends Controller
                 $output .= '<title>' . ucfirst(strtolower($product['name'])) . '</title>';
                 $output .= '<link>' . $this->url->link('product/product', 'product_id=' . $product['product_id']) . '</link>';
                 $output .= '<description><![CDATA[' . strip_tags(html_entity_decode($product['description'], ENT_QUOTES, 'UTF-8')) . ']]></description>';
-                $output .= '<g:brand><![CDATA[' . html_entity_decode($product['manufacturer'], ENT_QUOTES, 'UTF-8') . ']]></g:brand>';
+                $output .= '<g:brand>' . html_entity_decode($product['manufacturer'], ENT_QUOTES, 'UTF-8') . '></g:brand>';
                 $output .= '<g:condition>new</g:condition>';
                 $output .= '<g:id>' . $product['product_id'] . '</g:id>';
 
@@ -60,11 +62,12 @@ class ControllerExtensionFeedGoogleBase extends Controller
                 }
 
                 if ((float)$product['special']) {
-                    $output .= '  <g:price>' . $this->currency->format($this->tax->calculate($product['special'], $product['tax_class_id']), $currency_code, $currency_value, false) . '</g:price>';
+                    $output .= '  <g:price>' .  $this->currency->format($this->tax->calculate($product['special'], $product['tax_class_id']), $currency_code, $currency_value, false) . '</g:price>';
                 } else {
                     $output .= '  <g:price>' . $product["price"] * 38 . ' UAH</g:price>';
                 }
 
+                // 		$output .= '  <g:google_product_category>' . $google_base_category['google_base_category_id'] . '</g:google_product_category>';
 
                 $categories = $this->model_catalog_product->getCategories($product['product_id']);
 
@@ -96,6 +99,7 @@ class ControllerExtensionFeedGoogleBase extends Controller
                 $output .= '</item>';
             }
         }
+// 			}
 
         $output .= '  </channel>';
         $output .= '</rss>';
@@ -104,8 +108,7 @@ class ControllerExtensionFeedGoogleBase extends Controller
         $this->response->setOutput($output);
     }
 
-    protected function getPath($parent_id, $current_path = '')
-    {
+    protected function getPath($parent_id, $current_path = '') {
         $category_info = $this->model_catalog_category->getCategory($parent_id);
 
         if ($category_info) {
